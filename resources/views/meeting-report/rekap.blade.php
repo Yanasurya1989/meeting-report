@@ -2,7 +2,7 @@
 
 @section('content')
     <div class="max-w-3xl mx-auto bg-white p-6 shadow rounded">
-        <h2 class="text-xl font-bold mb-4">Rekap Kehadiran Peserta Meeting</h2>
+        <h2 class="text-xl font-bold mb-4">Rekap Kehadiran Rapat</h2>
 
         <form method="GET" class="flex space-x-4 mb-6">
             <input type="date" name="dari" class="border rounded px-2 py-1" value="{{ request('dari') }}" required>

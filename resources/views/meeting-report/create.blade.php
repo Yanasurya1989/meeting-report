@@ -44,8 +44,14 @@
             <!-- Peserta -->
             <div class="mb-4">
                 <label class="block text-sm font-medium text-gray-700 mb-1">Daftar Peserta</label>
+
+                <label class="flex items-center space-x-2 mb-2">
+                    <input type="checkbox" id="checkAll" class="rounded border-gray-300">
+                    <span><strong>Centang Semua Peserta</strong></span>
+                </label>
+
                 <div class="grid grid-cols-2 gap-2">
-                    @php $peserta = ['Ali', 'Budi', 'Citra', 'Dewi', 'Eka']; @endphp
+                    @php $peserta = ['Hilda Putri Juani', 'Erni Hermiawati', 'Satinah', 'Aan Yulia', 'Hendi Rochimat','Dadah Mujahidah','Dindin Jaenudin','Tia Aprilia']; @endphp
                     @foreach ($peserta as $nama)
                         <label class="flex items-center space-x-2">
                             <input type="checkbox" name="peserta[]" value="{{ $nama }}"
@@ -128,6 +134,19 @@
         }
 
         window.addEventListener('DOMContentLoaded', startCamera);
+    </script>
+    <script>
+        // Fungsi centang semua peserta
+        document.addEventListener('DOMContentLoaded', function() {
+            const checkAll = document.getElementById('checkAll');
+            const checkboxes = document.querySelectorAll('input[name="peserta[]"]');
+
+            checkAll.addEventListener('change', function() {
+                checkboxes.forEach(checkbox => {
+                    checkbox.checked = checkAll.checked;
+                });
+            });
+        });
     </script>
 </body>
 

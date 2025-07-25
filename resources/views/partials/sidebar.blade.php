@@ -9,13 +9,13 @@
             {{-- Yayasan --}}
             @php
                 $current = request()->path();
-                $yayasanSlug = 'yayasan';
-                $isActive = $current === $yayasanSlug;
+                $meetingCreatePath = route('meeting.create'); // URL yang diarahkan
+                $isActive = $current === 'meeting/create'; // Penyesuaian agar class aktif berfungsi
             @endphp
             <li>
-                <a href="{{ url($yayasanSlug) }}"
+                <a href="{{ $meetingCreatePath }}"
                     class="flex items-center px-6 py-2 font-medium rounded-md transition
-                    {{ $isActive ? 'bg-blue-100 text-blue-600 font-semibold' : 'text-gray-700 hover:bg-gray-100' }}">
+        {{ $isActive ? 'bg-blue-100 text-blue-600 font-semibold' : 'text-gray-700 hover:bg-gray-100' }}">
                     <svg class="h-5 w-5 mr-2 text-gray-400" fill="none" stroke="currentColor" stroke-width="2"
                         viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h8m-8 6h16" />
