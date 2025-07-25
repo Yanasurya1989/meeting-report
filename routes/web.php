@@ -2,10 +2,13 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\MeetingReportController;
+use App\Exports\RekapKehadiranExport;
+use Maatwebsite\Excel\Facades\Excel;
 
-Route::get('/', function () {
-    return view('dashboard');
-});
+Route::get('/export-kehadiran', function () {
+    $rekap = session('rekap'); // Ambil dari session
+    return Excel::download(new RekapKehadiranExport($rekap), 'rekap-kehadiran.xlsx');
+})->name('kehadiran.export');
 
 $menus = ['yayasan', 'bidang1', 'bidang2', 'bidang3', 'bidang4', 'sma', 'smp', 'sd'];
 
@@ -20,3 +23,8 @@ Route::post('/meeting/store', [MeetingReportController::class, 'store'])->name('
 
 Route::get('/meeting-report', [MeetingReportController::class, 'index'])->name('meeting.index');
 Route::get('/rekap-peserta', [App\Http\Controllers\MeetingReportController::class, 'rekap'])->name('rekap.peserta');
+
+
+Route::get('/', function () {
+    return view('dashboard');
+});

@@ -35,10 +35,14 @@ class MeetingReportController extends Controller
                     $rekap[$nama]++;
                 }
             }
+
+            // Tambahkan baris ini agar bisa diexport ke Excel
+            session(['rekap' => $rekap]);
         }
 
         return view('meeting-report.rekap', compact('rekap'));
     }
+
 
     public function create()
     {

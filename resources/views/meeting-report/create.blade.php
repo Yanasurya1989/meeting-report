@@ -71,6 +71,11 @@
                 </div>
                 <canvas id="canvas" class="hidden"></canvas>
                 <input type="hidden" name="capture_image" id="capture_image">
+
+                <button type="button" id="captureAgain" class="mt-2 bg-gray-500 text-white px-3 py-1 rounded">
+                    Ambil Ulang Foto
+                </button>
+
             </div>
 
             <!-- Waktu -->
@@ -124,9 +129,8 @@
                     const imageData = canvas.toDataURL('image/png');
                     photoInput.value = imageData;
                     preview.src = imageData;
-                    stream.getTracks().forEach(track => track.stop());
-                    video.classList.add('opacity-50');
                 }, 2000);
+
             } catch (err) {
                 alert('Tidak bisa mengakses kamera.');
                 console.error(err);
@@ -135,6 +139,16 @@
 
         window.addEventListener('DOMContentLoaded', startCamera);
     </script>
+
+    <script>
+        document.getElementById('captureAgain').addEventListener('click', () => {
+            canvas.getContext('2d').drawImage(video, 0, 0);
+            const imageData = canvas.toDataURL('image/png');
+            photoInput.value = imageData;
+            preview.src = imageData;
+        });
+    </script>
+
     <script>
         // Fungsi centang semua peserta
         document.addEventListener('DOMContentLoaded', function() {

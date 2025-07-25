@@ -9,6 +9,14 @@
             <input type="date" name="sampai" class="border rounded px-2 py-1" value="{{ request('sampai') }}" required>
             <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded">Tampilkan</button>
         </form>
+        @if (!empty($rekap))
+            <div class="mb-4">
+                <a href="{{ route('kehadiran.export') }}"
+                    class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded">
+                    📤 Export Excel
+                </a>
+            </div>
+        @endif
 
         @if (!empty($rekap))
             <table class="w-full table-auto border border-collapse">
