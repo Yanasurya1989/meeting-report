@@ -7,7 +7,6 @@
             <button onclick="toggleDark()" class="bg-gray-200 dark:bg-gray-700 p-2 rounded text-sm">
                 🌗 Toggle Mode
             </button>
-
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
