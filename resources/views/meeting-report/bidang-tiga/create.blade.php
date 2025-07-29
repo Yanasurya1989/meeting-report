@@ -41,7 +41,7 @@
         </script>
 
         {{-- Form mulai di sini --}}
-        <form action="{{ route('meeting.store') }}" method="POST">
+        <form action="{{ route('meeting.bidang3.store') }}" method="POST">
             @csrf
 
             <!-- Notulen -->
@@ -60,7 +60,7 @@
                 </label>
 
                 <div class="grid grid-cols-2 gap-2">
-                    @php $peserta = ['Hilda Putri Juani', 'Erni Hermiawati', 'Satinah', 'Aan Yulia', 'Hendi Rochimat','Dadah Mujahidah','Dindin Jaenudin','Tia Aprilia']; @endphp
+                    @php $peserta = ['Aan Yulia', 'Annisa Nur Hasanah', 'Nova Herdiana', 'Halimah', 'Ftroh','Yana']; @endphp
                     @foreach ($peserta as $nama)
                         <label class="flex items-center space-x-2">
                             <input type="checkbox" name="peserta[]" value="{{ $nama }}"

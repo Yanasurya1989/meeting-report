@@ -18,7 +18,8 @@
             </svg>
             Dashboard
         </a>
-        <h1 class="text-2xl font-bold mb-4">Form Laporan Meeting Yayasan</h1>
+
+        <h1 class="text-2xl font-bold mb-4">Form Laporan Meeting Bidang 1</h1>
 
         @if (session('success'))
             <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
@@ -41,7 +42,7 @@
         </script>
 
         {{-- Form mulai di sini --}}
-        <form action="{{ route('meeting.store') }}" method="POST">
+        <form action="{{ route('bidang1.store') }}" method="POST">
             @csrf
 
             <!-- Notulen -->
@@ -60,7 +61,7 @@
                 </label>
 
                 <div class="grid grid-cols-2 gap-2">
-                    @php $peserta = ['Hilda Putri Juani', 'Erni Hermiawati', 'Satinah', 'Aan Yulia', 'Hendi Rochimat','Dadah Mujahidah','Dindin Jaenudin','Tia Aprilia']; @endphp
+                    @php $peserta = ['Satinah', 'Tim1', 'Tim2']; @endphp
                     @foreach ($peserta as $nama)
                         <label class="flex items-center space-x-2">
                             <input type="checkbox" name="peserta[]" value="{{ $nama }}"

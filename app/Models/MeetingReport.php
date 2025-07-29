@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class MeetingReport extends Model
 {
-    protected $fillable = ['notulen', 'peserta', 'waktu_rapat', 'capture_image'];
+    protected $fillable = ['notulen', 'peserta', 'waktu_rapat', 'capture_image', 'divisi'];
     protected $casts = [
         'peserta' => 'array',
         'waktu_rapat' => 'datetime',
