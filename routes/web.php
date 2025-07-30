@@ -20,7 +20,9 @@ Route::get('meeting/rekap/yayasan', [App\Http\Controllers\MeetingReportControlle
 Route::get('/meeting/create/bidang-satu', [MeetingReportController::class, 'bidang_satu_create'])->name('meeting.create.bidang_satu');
 Route::post('/bidang-1/store', [MeetingReportController::class, 'bidang_satu_store'])->name('bidang1.store');
 Route::get('/meeting/index/bidang-satu', [MeetingReportController::class, 'bidang_satu_index'])->name('meeting.bidang-satu.index');
-Route::get('meeting/rekap/bidang-satu', [MeetingReportController::class, 'rekapBidangSatu'])->name('rekap.bidang-satu');
+Route::get('/meeting/rekap/bidang-satu', [MeetingReportController::class, 'rekapBidangSatu'])->name('rekap.bidang-satu');
+Route::get('/meeting/export/bidang-satu', [MeetingReportController::class, 'exportBidangSatu'])->name('export.bidang-satu');
+
 
 // BIDANG DUA
 Route::get('meeting/create/bidang-dua', [MeetingReportController::class, 'bidang_dua_create'])->name('meeting.bidang_dua_create');
@@ -33,24 +35,34 @@ Route::get('/meeting/index/bidang-dua', [MeetingReportController::class, 'indexB
 Route::get('/meeting/create/bidang-tiga', [MeetingReportController::class, 'bidang_tiga_create'])->name('meeting.create.bidang_tiga');
 Route::get('/meeting/index/bidang-tiga', [MeetingReportController::class, 'indexBidangTiga'])->name('meeting.bidang-tiga.index');
 Route::post('/meeting/bidang3/store', [MeetingReportController::class, 'storeBidangTiga'])->name('meeting.bidang3.store');
+Route::get('meeting/rekap/bidang-tiga', [MeetingReportController::class, 'rekapBidangTiga'])->name('rekap.bidang-tiga');
 
 // Bidang Empat
-Route::get('/meeting/index/bidang-empat', [MeetingReportController::class, 'indexBidangTiga'])->name('meeting.bidang-empat.index');
-
-// Bidang ks-sd
-Route::get('/meeting/index/ks-sd', [MeetingReportController::class, 'indexBidangTiga'])->name('meeting.ks-sd.index');
-
-// Bidang ks-smp
-Route::get('/meeting/index/ks-smp', [MeetingReportController::class, 'indexBidangTiga'])->name('meeting.ks-smp.index');
+Route::get('/meeting/create/bidang-empat', [MeetingReportController::class, 'bidang_empat_create'])->name('meeting.create.bidang_empat');
+Route::get('/meeting/index/bidang-empat', [MeetingReportController::class, 'indexBidangEmpat'])->name('meeting.bidang-empat.index');
+Route::post('/meeting/bidang4/store', [MeetingReportController::class, 'storeBidangEmpat'])->name('meeting.bidang4.store');
+Route::get('/meeting/rekap/bidang-empat', [MeetingReportController::class, 'rekapBidangEmpat'])->name('rekap.bidang-empat');
 
 // Bidang ks-sma
-Route::get('/meeting/index/ks-sma', [MeetingReportController::class, 'indexBidangTiga'])->name('meeting.ks-sma.index');
+Route::get('/sma/create', [MeetingReportController::class, 'sma_create'])->name('sma.create');
+Route::get('/sma/index', [MeetingReportController::class, 'indexSMA'])->name('sma.index');
+Route::post('/sma/store', [MeetingReportController::class, 'storeSMA'])->name('sma.store');
 
+// Bidang ks-sd
+// Route::get('/sd', [MeetingReportController::class, 'indexSD'])->name('meeting.ks-sd.index');
+Route::get('/meeting/ks-sd/index', [MeetingReportController::class, 'indexSD'])->name('meeting.ks-sd.index');
+
+Route::get('/sd/create', [MeetingReportController::class, 'sd_create'])->name('meeting.create.sd');
+Route::post('/sd/store', [MeetingReportController::class, 'sd_store'])->name('sd.store');
+
+// Bidang ks-smp
+Route::get('/smp/create', [MeetingReportController::class, 'smp_create'])->name('meeting.create.smp');
+Route::post('/smp/store', [MeetingReportController::class, 'smp_store'])->name('smp.store');
+Route::get('/meeting/index/ks-smp', [MeetingReportController::class, 'indexBidangTiga'])->name('meeting.ks-smp.index');
 
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [LoginController::class, 'login']);
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
-
 
 Route::get('/export-kehadiran', function () {
     $rekap = session('rekap'); // Ambil dari session

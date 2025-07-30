@@ -97,7 +97,7 @@
                                                     : ($divisi === 'ks-smp'
                                                         ? route('meeting.ks-smp.index')
                                                         : ($divisi === 'ks-sma'
-                                                            ? route('meeting.ks-sma.index')
+                                                            ? route('sma.index')
                                                             : '#'))))))) }}"
                                 class="text-blue-600 dark:text-blue-400 text-sm hover:underline">
                                 Lihat Semua
@@ -106,7 +106,9 @@
                         <ul class="list-disc list-inside text-sm text-gray-700 dark:text-gray-300 space-y-1">
                             @forelse ($data as $meeting)
                                 <li>
-                                    <span class="font-semibold">{{ $meeting->notulen ?? 'Tanpa Judul' }}</span>
+                                    <span class="font-semibold">
+                                        {{ $meeting->notulen }}
+                                    </span>
                                     <span class="text-xs text-gray-500 dark:text-gray-400">
                                         ({{ \Carbon\Carbon::parse($meeting->waktu_rapat)->translatedFormat('d M Y') }})
                                     </span>
@@ -115,6 +117,7 @@
                                 <li class="text-gray-500 italic">Belum ada data rapat.</li>
                             @endforelse
                         </ul>
+
                     </div>
                 @endif
             @endforeach

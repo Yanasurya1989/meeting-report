@@ -5,10 +5,16 @@ namespace App\Http\Controllers;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Models\MeetingReport;
+use App\Models\MeetingReportSma;
+use App\Models\MeetingReportSmp;
 use App\Models\MeetingReportBidang1;
 use App\Models\MeetingReportBidang2;
 use App\Models\MeetingReportBidang3;
+use App\Models\MeetingReportBidang4;
+use App\Models\MeetingReportSD;
 use Illuminate\Support\Facades\Storage;
+use App\Exports\RekapBidangSatuExport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class MeetingReportController extends Controller
 {
@@ -149,21 +155,28 @@ class MeetingReportController extends Controller
             foreach ($laporan as $item) {
                 $pesertaArray = is_string($item->peserta) ? json_decode($item->peserta, true) : $item->peserta;
 
-                if (is_array($pesertaArray)) {
-                    foreach ($pesertaArray as $nama) {
-                        if (!isset($rekap[$nama])) {
-                            $rekap[$nama] = 0;
-                        }
-                        $rekap[$nama]++;
+                foreach ($pesertaArray as $nama) {
+                    if (!isset($rekap[$nama])) {
+                        $rekap[$nama] = 0;
                     }
+                    $rekap[$nama]++;
                 }
             }
 
-            session(['rekap_bidang_satu' => $rekap]); // untuk keperluan export excel bidang 1
+            session(['rekapBidangSatu' => $rekap]);
         }
 
         return view('meeting-report.bidang-satu.rekap', compact('rekap'));
     }
+
+    public function exportBidangSatu()
+    {
+        $rekap = session('rekapBidangSatu', []);
+
+        return Excel::download(new RekapBidangSatuExport($rekap), 'rekap-bidang-satu.xlsx');
+    }
+
+
     // bidang satu end
 
     // bidang dua start
@@ -231,20 +244,22 @@ class MeetingReportController extends Controller
 
     public function indexBidangDua()
     {
-        $laporan = MeetingReportBidang2::latest()->get();
+        $meetings = MeetingReportBidang2::latest()->get();
 
-        return view('meeting-report.bidang-dua.index', compact('laporan'));
+        return view('meeting-report.bidang-dua.index', compact('meetings'));
     }
     // bidang dua end
+
     // bidang tiga start
     public function bidang_tiga_create()
     {
         return view('meeting-report.bidang-tiga.create');
     }
+
     public function indexBidangTiga()
     {
         $meetings = MeetingReportBidang3::latest()->get();
-        return view('meeting.bidang-tiga.index', compact('meetings'));
+        return view('meeting-report.bidang-tiga.index', compact('meetings'));
     }
 
     public function storeBidangTiga(Request $request)
@@ -274,5 +289,254 @@ class MeetingReportController extends Controller
             return redirect()->back()->with('error', 'Gagal menyimpan data: ' . $e->getMessage());
         }
     }
+
+    public function rekapBidangTiga(Request $request)
+    {
+        $rekap = [];
+
+        if ($request->filled(['dari', 'sampai'])) {
+            $dari = Carbon::parse($request->dari)->startOfDay();
+            $sampai = Carbon::parse($request->sampai)->endOfDay();
+
+            $laporan = MeetingReportBidang3::whereBetween('waktu_rapat', [$dari, $sampai])->get();
+
+            foreach ($laporan as $item) {
+                $pesertaArray = is_string($item->peserta) ? json_decode($item->peserta, true) : $item->peserta;
+
+                if (is_array($pesertaArray)) {
+                    foreach ($pesertaArray as $nama) {
+                        if (!isset($rekap[$nama])) {
+                            $rekap[$nama] = 0;
+                        }
+                        $rekap[$nama]++;
+                    }
+                }
+            }
+
+            session(['rekap_bidang_tiga' => $rekap]);
+        }
+
+        return view('meeting-report.bidang-tiga.rekap', compact('rekap'));
+    }
     // bidang tiga end
+
+    // bidang empat start
+    public function bidang_empat_create()
+    {
+        return view('meeting-report.bidang-empat.create');
+    }
+
+    public function indexBidangEmpat()
+    {
+        $meetings = MeetingReportBidang4::latest()->get();
+        return view('meeting-report.bidang-empat.index', compact('meetings'));
+    }
+
+    public function storeBidangEmpat(Request $request)
+    {
+        try {
+            $request->validate([
+                'notulen' => 'required',
+                'peserta' => 'nullable|array',
+                'peserta.*' => 'string',
+                'capture_image' => 'required|string',
+                'waktu_rapat' => 'required|date',
+            ]);
+
+            $imageName = time() . '.png';
+            $imagePath = public_path('meeting_photos/' . $imageName);
+            file_put_contents($imagePath, file_get_contents($request->capture_image));
+
+            MeetingReportBidang4::create([
+                'notulen' => $request->notulen,
+                'peserta' => $request->peserta,
+                'capture_image' => 'meeting_photos/' . $imageName,
+                'waktu_rapat' => $request->waktu_rapat,
+            ]);
+
+            return redirect()->back()->with('success', 'Laporan Bidang 4 berhasil disimpan.');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Gagal menyimpan data: ' . $e->getMessage());
+        }
+    }
+
+    public function rekapBidangEmpat(Request $request)
+    {
+        $rekap = [];
+
+        if ($request->filled(['dari', 'sampai'])) {
+            $dari = Carbon::parse($request->dari)->startOfDay();
+            $sampai = Carbon::parse($request->sampai)->endOfDay();
+
+            $laporan = MeetingReportBidang4::whereBetween('waktu_rapat', [$dari, $sampai])->get();
+
+            foreach ($laporan as $item) {
+                $pesertaArray = is_string($item->peserta) ? json_decode($item->peserta, true) : $item->peserta;
+
+                if (is_array($pesertaArray)) {
+                    foreach ($pesertaArray as $nama) {
+                        if (!isset($rekap[$nama])) {
+                            $rekap[$nama] = 0;
+                        }
+                        $rekap[$nama]++;
+                    }
+                }
+            }
+
+            session(['rekap_bidang_empat' => $rekap]);
+        }
+
+        return view('meeting-report.bidang-empat.rekap', compact('rekap'));
+    }
+    // bidang empat end
+
+    // sma start
+    public function sma_create()
+    {
+        return view('meeting-report.sma.create');
+    }
+
+    public function storeSMA(Request $request)
+    {
+        try {
+            $request->validate([
+                'notulen' => 'required',
+                'peserta' => 'nullable|array',
+                'peserta.*' => 'string',
+                'capture_image' => 'required|string',
+                'waktu_rapat' => 'required|date',
+            ]);
+
+            $imageName = time() . '.png';
+            $imagePath = public_path('meeting_photos/' . $imageName);
+            file_put_contents($imagePath, file_get_contents($request->capture_image));
+
+            MeetingReportSma::create([
+                'notulen' => $request->notulen,
+                'peserta' => $request->peserta,
+                'capture_image' => 'meeting_photos/' . $imageName,
+                'waktu_rapat' => $request->waktu_rapat,
+            ]);
+
+            return redirect()->back()->with('success', 'Laporan Meeting SMA berhasil disimpan.');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Gagal menyimpan data: ' . $e->getMessage());
+        }
+    }
+
+    public function indexSMA()
+    {
+        $meetings = MeetingReportSma::latest()->get();
+        return view('meeting-report.sma.index', compact('meetings'));
+    }
+    // sma end
+
+    // smp start
+    public function smp_create()
+    {
+        return view('meeting-report.smp.create');
+    }
+
+    public function smp_store(Request $request)
+    {
+        $request->validate([
+            'notulen' => 'required|string',
+            'peserta' => 'required|array',
+            'capture_image' => 'nullable|string',
+            'waktu_rapat' => 'required|date',
+        ]);
+
+        MeetingReportSmp::create([
+            'notulen' => $request->notulen,
+            'peserta' => $request->peserta,
+            'capture_image' => $request->capture_image,
+            'waktu_rapat' => $request->waktu_rapat,
+        ]);
+
+        return redirect()->back()->with('success', 'Laporan berhasil disimpan.');
+    }
+    // smp end
+
+    // sd start
+    public function sd_create()
+    {
+        $peserta = [
+            'Annisa fatwa purnama',
+            'Siti Fazri',
+            'Febyanti Nur Fitriani',
+            'Rise Fathonah',
+            'Risna Ayu Siti Solihat',
+            'Emma Kiki Maria',
+            'Dedi Sopian',
+            'Fitriani',
+            'Ikhlas Naufal Marijan, S.Pd',
+            'Yuni Yulianingsih',
+            'Winda Rusmiati Purnama',
+            'Amalia Nur Sabbila, S. Hum',
+            'Intan Septiaranie Jannatun Naim',
+            'Muhammad Said',
+            'Lisda Nurhardiyanti',
+            'NENG SRI HARDIANTI',
+            'Weni Santika',
+            'Silvi Noviani',
+            'Ilham Nurzaman',
+            'Risma Afrianti',
+            'Firdausi Nuzula, S.Pd.',
+            'Rangga Aditya Pratama',
+            'Yasinta Amelia',
+            'Sulaeman',
+            'Heru Setio Darmaji',
+            'Fetty Marwati Sanusi',
+            'Hadian Sahidin',
+            'Anisa Auliya',
+            'Yuli Ratmawati',
+            'Ayu Melani Nurjanah',
+            'solehudin',
+            'Rina Siti Mariam, S.Pd.',
+            'Husni Aulia',
+            'Syifa Amalia ',
+            'Siti Mariah',
+            'Enong Yulia',
+            'Lia Aulia',
+            'Dina Nur Hikmayati',
+            'Hilmi Muhamad',
+            'Tatan Desrina S.Pd.I',
+            'Ida Nuryani',
+            'Annisa islami M S.Ag',
+            'Tita Komala Dewi',
+            'Dilla Marliana Hidayanti',
+            'Yulia Risdiana',
+            'Tarisa Bintang Maharani',
+            'Azalia Ratri Choerunisa',
+            'Dini Nur Apriani',
+            'Reza Dwi Putra Ramadhan',
+        ];
+        return view('meeting-report.sd.create', compact('peserta'));
+    }
+
+    public function sd_store(Request $request)
+    {
+        $request->validate([
+            'notulen' => 'required|string',
+            'peserta' => 'required|array',
+            'capture_image' => 'nullable|string',
+            'waktu_rapat' => 'required|date',
+        ]);
+
+        MeetingReportSD::create([
+            'notulen' => $request->notulen,
+            'peserta' => $request->peserta,
+            'capture_image' => $request->capture_image,
+            'waktu_rapat' => $request->waktu_rapat,
+        ]);
+
+        return redirect()->back()->with('success', 'Laporan berhasil disimpan.');
+    }
+
+    public function indexSD()
+    {
+        $meetings = MeetingReportSD::latest()->get();
+        return view('meeting-report.sd.index', compact('meetings'));
+    }
+    // sd end
 }

@@ -60,7 +60,7 @@
         {{-- Konten utama --}}
         <div class="flex-1 flex flex-col overflow-y-auto">
             <header class="bg-white dark:bg-gray-800 shadow px-6 py-4 flex items-center justify-between">
-                <h1 class="text-2xl font-bold text-gray-800 dark:text-white">Dashboard Backend</h1>
+                <h1 class="text-2xl font-bold text-gray-800 dark:text-white">Meeting Report</h1>
                 {{-- <button onclick="toggleDark()" class="bg-gray-200 dark:bg-gray-700 p-2 rounded text-sm">
                     Toggle Mode
                 </button> --}}

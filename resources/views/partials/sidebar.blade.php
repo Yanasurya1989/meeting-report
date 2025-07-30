@@ -1,13 +1,12 @@
 <aside class="w-64 h-screen overflow-y-auto scroll-smooth bg-white shadow-lg border-r" x-data="{ openGroups: { yayasan: true, bidang: true, sekolah: true, admin: true } }">
 
     <div class="p-6 text-xl font-bold text-blue-600 border-b">
-        Admin Panel
+        SIT Qordova
     </div>
 
     <nav class="mt-4">
         <ul class="space-y-2 text-sm">
 
-            {{-- Setup peran --}}
             @php
                 $role = auth()->user()->role->name;
                 $isDirektur = $role === 'direktur';

@@ -3,7 +3,6 @@
 @section('content')
     <div class="max-w-3xl mx-auto bg-white p-6 shadow rounded">
         <h2 class="text-xl font-bold mb-4">Rekap Kehadiran Rapat</h2>
-
         <a href="{{ route('dashboard') }}"
             class="inline-flex items-center mb-4 text-white bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg shadow transition">
             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"
@@ -13,7 +12,6 @@
             </svg>
             Dashboard
         </a>
-
         <form method="GET" class="flex space-x-4 mb-6">
             <input type="date" name="dari" class="border rounded px-2 py-1" value="{{ request('dari') }}" required>
             <input type="date" name="sampai" class="border rounded px-2 py-1" value="{{ request('sampai') }}" required>
@@ -21,7 +19,7 @@
         </form>
         @if (!empty($rekap))
             <div class="mb-4">
-                <a href="{{ route('export.bidang-satu') }}"
+                <a href="{{ route('kehadiran.export') }}"
                     class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded">
                     📤 Export Excel
                 </a>
