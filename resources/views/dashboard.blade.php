@@ -41,12 +41,11 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach ($users as $index => $user)
+                            @foreach ($users as $index => $pengguna)
                                 <tr x-show="showAll || {{ $index }} < 3" class="border-t">
-                                    <td>{{ $user->name }}</td>
-                                    <td> </td>
-                                    {{-- <td>{{ $user->role->id ?? '-' }}</td> --}}
-                                    <td>{{ $user->bidang ?? '-' }}</td>
+                                    <td>{{ $pengguna->name }}</td>
+                                    <td></td>
+                                    <td>{{ $pengguna->bidang ?? '-' }}</td>
                                 </tr>
                             @endforeach
                         </tbody>
@@ -92,12 +91,12 @@
                                             ? route('meeting.bidang-tiga.index')
                                             : ($divisi === 'bidang-empat'
                                                 ? route('meeting.bidang-empat.index')
-                                                : ($divisi === 'ks-sd'
-                                                    ? route('meeting.ks-sd.index')
-                                                    : ($divisi === 'ks-smp'
-                                                        ? route('meeting.ks-smp.index')
-                                                        : ($divisi === 'ks-sma'
-                                                            ? route('sma.index')
+                                                : ($divisi === 'sd'
+                                                    ? route('meeting.sd.index')
+                                                    : ($divisi === 'smp'
+                                                        ? route('meeting.smp.index')
+                                                        : ($divisi === 'sma'
+                                                            ? route('meeting.sma.index')
                                                             : '#'))))))) }}"
                                 class="text-blue-600 dark:text-blue-400 text-sm hover:underline">
                                 Lihat Semua

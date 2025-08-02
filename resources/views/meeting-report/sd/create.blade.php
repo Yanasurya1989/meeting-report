@@ -41,7 +41,7 @@
         </script>
 
         {{-- Form mulai di sini --}}
-        <form action="{{ route('meeting.store') }}" method="POST">
+        <form action="{{ route('sd.store') }}" method="POST">
             @csrf
 
             <!-- Notulen -->

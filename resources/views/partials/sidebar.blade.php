@@ -130,12 +130,27 @@
                                         <li><a href="{{ url($data['slug'] . '/create') }}"
                                                 class="block px-4 py-1 rounded-md transition {{ request()->is($data['slug'] . '/create') ? 'bg-blue-100 text-blue-600 font-semibold' : 'text-gray-700 hover:bg-gray-100' }}">Insert</a>
                                         </li>
-                                        <li><a href="{{ url($data['slug']) }}"
+                                        {{-- <li><a href="{{ url($data['slug']) }}"
                                                 class="block px-4 py-1 rounded-md transition {{ request()->is($data['slug']) ? 'bg-blue-100 text-blue-600 font-semibold' : 'text-gray-700 hover:bg-gray-100' }}">Index</a>
+                                        </li> --}}
+                                        <li>
+                                            <a href="{{ route('meeting.' . $data['slug'] . '.index') }}"
+                                                class="block px-4 py-1 rounded-md transition {{ request()->is('meeting/index/' . $data['slug']) ? 'bg-blue-100 text-blue-600 font-semibold' : 'text-gray-700 hover:bg-gray-100' }}">
+                                                Index
+                                            </a>
                                         </li>
-                                        <li><a href="{{ route('rekap.peserta') }}"
+
+                                        {{-- <li><a href="{{ route('rekap.peserta') }}"
                                                 class="block px-4 py-1 rounded-md transition {{ request()->is('rekap-peserta') ? 'bg-blue-100 text-blue-600 font-semibold' : 'text-gray-700 hover:bg-gray-100' }}">Rekap</a>
+                                        </li> --}}
+
+                                        <li>
+                                            <a href="{{ url('meeting/rekap/' . $data['slug']) }}"
+                                                class="block px-4 py-1 rounded-md transition {{ request()->is('meeting/rekap/' . $data['slug']) ? 'bg-blue-100 text-blue-600 font-semibold' : 'text-gray-700 hover:bg-gray-100' }}">
+                                                Rekap
+                                            </a>
                                         </li>
+
                                     </ul>
                                 </li>
                             @endif

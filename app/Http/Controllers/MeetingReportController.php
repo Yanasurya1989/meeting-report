@@ -5,16 +5,22 @@ namespace App\Http\Controllers;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Models\MeetingReport;
+use App\Models\MeetingReportSD;
+use App\Exports\BidangDuaExport;
 use App\Models\MeetingReportSma;
 use App\Models\MeetingReportSmp;
+use App\Exports\BidangTigaExport;
+use App\Exports\BidangEmpatExport;
 use App\Models\MeetingReportBidang1;
 use App\Models\MeetingReportBidang2;
 use App\Models\MeetingReportBidang3;
 use App\Models\MeetingReportBidang4;
-use App\Models\MeetingReportSD;
-use Illuminate\Support\Facades\Storage;
-use App\Exports\RekapBidangSatuExport;
 use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\MeetingReportSdExport;
+use App\Exports\RekapBidangSatuExport;
+use App\Exports\MeetingReportSmaExport;
+use App\Exports\MeetingReportSmpExport;
+use Illuminate\Support\Facades\Storage;
 
 class MeetingReportController extends Controller
 {
@@ -213,6 +219,24 @@ class MeetingReportController extends Controller
         }
     }
 
+    public function indexBidangDua()
+    {
+        $meetings = MeetingReportBidang2::latest()->get();
+
+        return view('meeting-report.bidang-dua.index', compact('meetings'));
+    }
+
+    public function exportBidangDua()
+    {
+        $rekap = session('rekap_bidang_dua', []);
+
+        if (empty($rekap)) {
+            return redirect()->back()->with('error', 'Tidak ada data untuk diexport.');
+        }
+
+        return Excel::download(new BidangDuaExport($rekap), 'rekap_bidang_dua.xlsx');
+    }
+
     public function rekapBidangDua(Request $request)
     {
         $rekap = [];
@@ -242,12 +266,6 @@ class MeetingReportController extends Controller
         return view('meeting-report.bidang-dua.rekap', compact('rekap'));
     }
 
-    public function indexBidangDua()
-    {
-        $meetings = MeetingReportBidang2::latest()->get();
-
-        return view('meeting-report.bidang-dua.index', compact('meetings'));
-    }
     // bidang dua end
 
     // bidang tiga start
@@ -317,6 +335,17 @@ class MeetingReportController extends Controller
         }
 
         return view('meeting-report.bidang-tiga.rekap', compact('rekap'));
+    }
+
+    public function exportBidangTiga()
+    {
+        $rekap = session('rekap_bidang_tiga', []);
+
+        if (empty($rekap)) {
+            return redirect()->back()->with('error', 'Tidak ada data untuk diexport.');
+        }
+
+        return Excel::download(new BidangTigaExport($rekap), 'rekap_bidang_tiga.xlsx');
     }
     // bidang tiga end
 
@@ -388,6 +417,18 @@ class MeetingReportController extends Controller
 
         return view('meeting-report.bidang-empat.rekap', compact('rekap'));
     }
+
+    public function exportBidangEmpat()
+    {
+        $rekap = session('rekap_bidang_empat', []);
+
+        if (empty($rekap)) {
+            return redirect()->back()->with('error', 'Tidak ada data untuk diexport.');
+        }
+
+        return Excel::download(new BidangEmpatExport($rekap), 'rekap_bidang_empat.xlsx');
+    }
+
     // bidang empat end
 
     // sma start
@@ -429,12 +470,59 @@ class MeetingReportController extends Controller
         $meetings = MeetingReportSma::latest()->get();
         return view('meeting-report.sma.index', compact('meetings'));
     }
+
+    public function rekapSMA(Request $request)
+    {
+        $rekap = [];
+
+        if ($request->filled(['dari', 'sampai'])) {
+            $dari = Carbon::parse($request->dari)->startOfDay();
+            $sampai = Carbon::parse($request->sampai)->endOfDay();
+
+            $laporan = MeetingReportSma::whereBetween('waktu_rapat', [$dari, $sampai])->get();
+
+            foreach ($laporan as $item) {
+                $pesertaArray = is_string($item->peserta) ? json_decode($item->peserta, true) : $item->peserta;
+
+                if (is_array($pesertaArray)) {
+                    foreach ($pesertaArray as $nama) {
+                        if (!isset($rekap[$nama])) {
+                            $rekap[$nama] = 0;
+                        }
+                        $rekap[$nama]++;
+                    }
+                }
+            }
+
+            session(['rekap_sma' => $rekap]);
+        }
+
+        return view('meeting-report.sma.rekap', compact('rekap'));
+    }
+
+    public function exportSMA()
+    {
+        $rekap = session('rekap_sma', []);
+
+        if (empty($rekap)) {
+            return redirect()->back()->with('error', 'Tidak ada data untuk diexport.');
+        }
+
+        return Excel::download(new MeetingReportSmaExport($rekap), 'rekap_sma.xlsx');
+    }
+
     // sma end
 
     // smp start
     public function smp_create()
     {
         return view('meeting-report.smp.create');
+    }
+
+    public function indexSMP()
+    {
+        $meetings = MeetingReportSmp::latest()->get();
+        return view('meeting-report.smp.index', compact('meetings'));
     }
 
     public function smp_store(Request $request)
@@ -455,6 +543,47 @@ class MeetingReportController extends Controller
 
         return redirect()->back()->with('success', 'Laporan berhasil disimpan.');
     }
+
+    public function rekapSMP(Request $request)
+    {
+        $rekap = [];
+
+        if ($request->filled(['dari', 'sampai'])) {
+            $dari = Carbon::parse($request->dari)->startOfDay();
+            $sampai = Carbon::parse($request->sampai)->endOfDay();
+
+            $laporan = MeetingReportSmp::whereBetween('waktu_rapat', [$dari, $sampai])->get();
+
+            foreach ($laporan as $item) {
+                $pesertaArray = is_string($item->peserta) ? json_decode($item->peserta, true) : $item->peserta;
+
+                if (is_array($pesertaArray)) {
+                    foreach ($pesertaArray as $nama) {
+                        if (!isset($rekap[$nama])) {
+                            $rekap[$nama] = 0;
+                        }
+                        $rekap[$nama]++;
+                    }
+                }
+            }
+
+            session(['rekap_smp' => $rekap]);
+        }
+
+        return view('meeting-report.smp.rekap', compact('rekap'));
+    }
+
+    public function exportSMP()
+    {
+        $rekap = session('rekap_smp', []);
+
+        if (empty($rekap)) {
+            return redirect()->back()->with('error', 'Tidak ada data untuk diexport.');
+        }
+
+        return Excel::download(new MeetingReportSmpExport($rekap), 'rekap_smp.xlsx');
+    }
+
     // smp end
 
     // sd start
@@ -538,5 +667,46 @@ class MeetingReportController extends Controller
         $meetings = MeetingReportSD::latest()->get();
         return view('meeting-report.sd.index', compact('meetings'));
     }
+
+    public function rekapSD(Request $request)
+    {
+        $rekap = [];
+
+        if ($request->filled(['dari', 'sampai'])) {
+            $dari = Carbon::parse($request->dari)->startOfDay();
+            $sampai = Carbon::parse($request->sampai)->endOfDay();
+
+            $laporan = MeetingReportSd::whereBetween('waktu_rapat', [$dari, $sampai])->get();
+
+            foreach ($laporan as $item) {
+                $pesertaArray = is_string($item->peserta) ? json_decode($item->peserta, true) : $item->peserta;
+
+                if (is_array($pesertaArray)) {
+                    foreach ($pesertaArray as $nama) {
+                        if (!isset($rekap[$nama])) {
+                            $rekap[$nama] = 0;
+                        }
+                        $rekap[$nama]++;
+                    }
+                }
+            }
+
+            session(['rekap_sd' => $rekap]);
+        }
+
+        return view('meeting-report.sd.rekap', compact('rekap'));
+    }
+
+    public function exportSD()
+    {
+        $rekap = session('rekap_sd', []);
+
+        if (empty($rekap)) {
+            return redirect()->back()->with('error', 'Tidak ada data untuk diexport.');
+        }
+
+        return Excel::download(new MeetingReportSdExport($rekap), 'rekap_sd.xlsx');
+    }
+
     // sd end
 }

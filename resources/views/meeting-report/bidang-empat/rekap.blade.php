@@ -19,7 +19,7 @@
         </form>
         @if (!empty($rekap))
             <div class="mb-4">
-                <a href="{{ route('kehadiran.export') }}"
+                <a href="{{ route('bidang4.export') }}"
                     class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded">
                     📤 Export Excel
                 </a>
