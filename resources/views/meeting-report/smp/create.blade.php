@@ -5,6 +5,23 @@
     <meta charset="UTF-8">
     <title>Form Laporan Meeting</title>
     <script src="https://cdn.tailwindcss.com"></script>
+
+    {{-- CKEditor --}}
+    <script src="https://cdn.ckeditor.com/ckeditor5/39.0.1/classic/ckeditor.js"></script>
+
+    <style>
+        .ck-editor__editable {
+            min-height: 200px;
+            background-color: white;
+            border-radius: 0.5rem;
+            padding: 1rem;
+        }
+
+        .ck.ck-editor__main>.ck-editor__editable:focus {
+            outline: none;
+            box-shadow: 0 0 0 2px #3b82f6;
+        }
+    </style>
 </head>
 
 <body class="bg-gray-100 p-8">
@@ -18,6 +35,7 @@
             </svg>
             Dashboard
         </a>
+
         <h1 class="text-2xl font-bold mb-4">Form Laporan Meeting Yayasan</h1>
 
         @if (session('success'))
@@ -32,35 +50,58 @@
             </div>
         @endif
 
-        <script>
-            setTimeout(() => {
-                document.querySelectorAll('[class*="bg-green-100"], [class*="bg-red-100"]').forEach(el => {
-                    el.style.display = 'none';
-                });
-            }, 3000);
-        </script>
-
-        {{-- Form mulai di sini --}}
         <form action="{{ route('smp.store') }}" method="POST">
             @csrf
 
-            <!-- Notulen -->
+            {{-- Notulen with CKEditor --}}
             <div class="mb-4">
-                <label for="notulen" class="block text-sm font-medium text-gray-700 mb-1">Notulen</label>
-                <textarea id="notulen" name="notulen" rows="4" required class="w-full border border-gray-300 rounded px-3 py-2"></textarea>
+                <label for="editor" class="block text-sm font-medium text-gray-700 mb-1">Notulen</label>
+                <input type="hidden" name="notulen" id="notulen" value="{{ old('notulen') }}">
+                <div id="editor"></div>
+                @error('notulen')
+                    <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                @enderror
             </div>
 
-            <!-- Peserta -->
+            {{-- Daftar Peserta --}}
             <div class="mb-4">
                 <label class="block text-sm font-medium text-gray-700 mb-1">Daftar Peserta</label>
-
                 <label class="flex items-center space-x-2 mb-2">
                     <input type="checkbox" id="checkAll" class="rounded border-gray-300">
                     <span><strong>Centang Semua Peserta</strong></span>
                 </label>
-
                 <div class="grid grid-cols-2 gap-2">
-                    @php $peserta = ['Nadia Nuraeni, S.Ak', 'safarina fatihah', 'HUSNITA RACHMAH', 'Murni Sucianti', 'Ridho Darajat', 'Rini Rahayu Febrianty', 'Fahma Muhammad Ramadhan', 'Hamdan Zulfa', 'jayinah', 'Iqbal Hardiyansah', 'Popy Adilia Khofifah', 'Irfan Firdaus', 'Reza Firmansyah', 'Utami Wulandari, S.Pd', 'Rahmasari Aisyah Fitri', 'Rika Siti Fatimah', 'Mulki Ahmad Fauzi', 'Dita Amanda Maulani, S. Pd.', 'Irhamna Pratiwi', 'Hannani Hamdiyah Inayatillah', 'Edi Junaedi', 'Isma Safera', 'Yunitasari', 'Nur Ahisnil Fadilah', 'Nuni Yuniartini', 'Zalfa Fadilatul Aula', 'Subhana']; @endphp
+                    @php
+                        $peserta = [
+                            'Nadia Nuraeni, S.Ak',
+                            'safarina fatihah',
+                            'HUSNITA RACHMAH',
+                            'Murni Sucianti',
+                            'Ridho Darajat',
+                            'Rini Rahayu Febrianty',
+                            'Fahma Muhammad Ramadhan',
+                            'Hamdan Zulfa',
+                            'jayinah',
+                            'Iqbal Hardiyansah',
+                            'Popy Adilia Khofifah',
+                            'Irfan Firdaus',
+                            'Reza Firmansyah',
+                            'Utami Wulandari, S.Pd',
+                            'Rahmasari Aisyah Fitri',
+                            'Rika Siti Fatimah',
+                            'Mulki Ahmad Fauzi',
+                            'Dita Amanda Maulani, S. Pd.',
+                            'Irhamna Pratiwi',
+                            'Hannani Hamdiyah Inayatillah',
+                            'Edi Junaedi',
+                            'Isma Safera',
+                            'Yunitasari',
+                            'Nur Ahisnil Fadilah',
+                            'Nuni Yuniartini',
+                            'Zalfa Fadilatul Aula',
+                            'Subhana',
+                        ];
+                    @endphp
                     @foreach ($peserta as $nama)
                         <label class="flex items-center space-x-2">
                             <input type="checkbox" name="peserta[]" value="{{ $nama }}"
@@ -71,7 +112,7 @@
                 </div>
             </div>
 
-            <!-- Kamera (Capture Otomatis) -->
+            {{-- Kamera --}}
             <div class="mb-4">
                 <label class="block text-gray-700 font-semibold mb-2">Ambil Foto Otomatis</label>
                 <div class="flex space-x-4">
@@ -80,21 +121,19 @@
                 </div>
                 <canvas id="canvas" class="hidden"></canvas>
                 <input type="hidden" name="capture_image" id="capture_image">
-
                 <button type="button" id="captureAgain" class="mt-2 bg-gray-500 text-white px-3 py-1 rounded">
                     Ambil Ulang Foto
                 </button>
-
             </div>
 
-            <!-- Waktu -->
+            {{-- Waktu --}}
             <div class="mb-4">
                 <label class="block text-sm font-medium text-gray-700 mb-1">Waktu</label>
                 <input type="text" id="waktu" name="waktu_rapat" readonly
                     class="w-full border border-gray-300 rounded px-3 py-2 bg-gray-100 text-gray-800">
             </div>
 
-            <!-- Tombol Submit -->
+            {{-- Submit --}}
             <div class="mt-6">
                 <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded">
                     Simpan Laporan
@@ -104,21 +143,41 @@
     </div>
 
     <script>
+        // CKEditor
+        let ckeditorInstance;
+        ClassicEditor
+            .create(document.querySelector('#editor'))
+            .then(editor => {
+                ckeditorInstance = editor;
+                editor.setData({!! json_encode(old('notulen')) !!});
+                editor.model.document.on('change:data', () => {
+                    document.getElementById('notulen').value = editor.getData();
+                });
+            })
+            .catch(error => {
+                console.error(error);
+            });
+
+        document.querySelector('form').addEventListener('submit', function() {
+            if (ckeditorInstance) {
+                document.getElementById('notulen').value = ckeditorInstance.getData();
+            }
+        });
+
+        // Waktu rapat (seperti versi awal)
         document.addEventListener('DOMContentLoaded', () => {
             const waktuField = document.getElementById('waktu');
             const now = new Date();
-
             const localDateTime = now.getFullYear() + "-" +
                 String(now.getMonth() + 1).padStart(2, '0') + "-" +
                 String(now.getDate()).padStart(2, '0') + " " +
                 String(now.getHours()).padStart(2, '0') + ":" +
                 String(now.getMinutes()).padStart(2, '0') + ":" +
                 String(now.getSeconds()).padStart(2, '0');
-
             waktuField.value = localDateTime;
         });
 
-
+        // Kamera otomatis
         const video = document.getElementById('video');
         const canvas = document.getElementById('canvas');
         const photoInput = document.getElementById('capture_image');
@@ -130,7 +189,6 @@
                     video: true
                 });
                 video.srcObject = stream;
-
                 setTimeout(() => {
                     canvas.width = video.videoWidth;
                     canvas.height = video.videoHeight;
@@ -139,7 +197,6 @@
                     photoInput.value = imageData;
                     preview.src = imageData;
                 }, 2000);
-
             } catch (err) {
                 alert('Tidak bisa mengakses kamera.');
                 console.error(err);
@@ -147,27 +204,20 @@
         }
 
         window.addEventListener('DOMContentLoaded', startCamera);
-    </script>
 
-    <script>
         document.getElementById('captureAgain').addEventListener('click', () => {
             canvas.getContext('2d').drawImage(video, 0, 0);
             const imageData = canvas.toDataURL('image/png');
             photoInput.value = imageData;
             preview.src = imageData;
         });
-    </script>
 
-    <script>
-        // Fungsi centang semua peserta
-        document.addEventListener('DOMContentLoaded', function() {
+        // Centang semua peserta
+        document.addEventListener('DOMContentLoaded', () => {
             const checkAll = document.getElementById('checkAll');
             const checkboxes = document.querySelectorAll('input[name="peserta[]"]');
-
-            checkAll.addEventListener('change', function() {
-                checkboxes.forEach(checkbox => {
-                    checkbox.checked = checkAll.checked;
-                });
+            checkAll.addEventListener('change', () => {
+                checkboxes.forEach(cb => cb.checked = checkAll.checked);
             });
         });
     </script>

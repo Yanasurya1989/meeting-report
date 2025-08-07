@@ -33,7 +33,6 @@
                 @forelse ($meetings as $index => $m)
                     <tr>
                         <td>{{ $index + 1 }}</td>
-                        {{-- <td>{{ $m->notulen }}</td> --}}
                         <td>
                             <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal"
                                 data-bs-target="#notulenModal{{ $m->id }}">
@@ -52,7 +51,7 @@
                                                 aria-label="Tutup"></button>
                                         </div>
                                         <div class="modal-body">
-                                            {{ $m->notulen }}
+                                            {!! $m->notulen !!}
                                         </div>
                                         <div class="modal-footer">
                                             <button type="button" class="btn btn-secondary"
@@ -72,8 +71,6 @@
                                 Tidak ada gambar
                             @endif
                         </td>
-
-
                     </tr>
                 @empty
                     <tr>
@@ -82,10 +79,8 @@
                 @endforelse
             </tbody>
         </table>
-
     </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-
 </body>
 
 </html>

@@ -97,7 +97,8 @@ class MeetingReportController extends Controller
                 'notulen' => $request->notulen,
                 'peserta' => json_encode($request->peserta),
                 'waktu_rapat' => now(),
-                'capture_image' => 'meeting_photos/' . $imageName, // path relatif ke public
+                'capture_image' => 'meeting_photos/' . $imageName,
+                'divisi' => 'yayasan',
             ]);
 
             return redirect()->back()->with('success', 'Data meeting berhasil disimpan.');
@@ -514,19 +515,20 @@ class MeetingReportController extends Controller
     // sma end
 
     // smp start
-    public function smp_create()
-    {
-        return view('meeting-report.smp.create');
-    }
-
     public function indexSMP()
     {
         $meetings = MeetingReportSmp::latest()->get();
         return view('meeting-report.smp.index', compact('meetings'));
     }
 
+    public function smp_create()
+    {
+        return view('meeting-report.smp.create');
+    }
+
     public function smp_store(Request $request)
     {
+        logger($request->all());
         $request->validate([
             'notulen' => 'required|string',
             'peserta' => 'required|array',
@@ -534,12 +536,20 @@ class MeetingReportController extends Controller
             'waktu_rapat' => 'required|date',
         ]);
 
+        // MeetingReportSmp::create([
+        //     'notulen' => $request->notulen,
+        //     'peserta' => $request->peserta,
+        //     'capture_image' => $request->capture_image,
+        //     'waktu_rapat' => $request->waktu_rapat,
+        // ]);
+
         MeetingReportSmp::create([
             'notulen' => $request->notulen,
-            'peserta' => $request->peserta,
+            'peserta' => json_encode($request->peserta),
             'capture_image' => $request->capture_image,
             'waktu_rapat' => $request->waktu_rapat,
         ]);
+
 
         return redirect()->back()->with('success', 'Laporan berhasil disimpan.');
     }

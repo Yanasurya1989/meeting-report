@@ -41,7 +41,7 @@
         </script>
 
         {{-- Form mulai di sini --}}
-        <form action="{{ route('smp.store') }}" method="POST">
+        <form action="{{ route('meeting.store') }}" method="POST">
             @csrf
 
             <!-- Notulen -->
