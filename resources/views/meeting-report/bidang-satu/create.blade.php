@@ -9,40 +9,9 @@
 
 <body class="bg-gray-100 p-8">
     <div class="max-w-2xl mx-auto bg-white p-6 rounded shadow">
-        <a href="{{ route('dashboard') }}"
-            class="inline-flex items-center mb-4 text-white bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg shadow transition">
-            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg">
-                <path stroke-linecap="round" stroke-linejoin="round"
-                    d="M3 9.75L12 4l9 5.75M4.5 10.5v8.25a.75.75 0 00.75.75h4.5v-4.5a1.5 1.5 0 011.5-1.5h3a1.5 1.5 0 011.5 1.5v4.5h4.5a.75.75 0 00.75-.75V10.5" />
-            </svg>
-            Dashboard
-        </a>
+        <h1 class="text-2xl font-bold mb-4">Form Laporan Meeting</h1>
 
-        <h1 class="text-2xl font-bold mb-4">Form Laporan Meeting Bidang 1</h1>
-
-        @if (session('success'))
-            <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
-                {{ session('success') }}
-            </div>
-        @endif
-
-        @if (session('error'))
-            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-                {{ session('error') }}
-            </div>
-        @endif
-
-        <script>
-            setTimeout(() => {
-                document.querySelectorAll('[class*="bg-green-100"], [class*="bg-red-100"]').forEach(el => {
-                    el.style.display = 'none';
-                });
-            }, 3000);
-        </script>
-
-        {{-- Form mulai di sini --}}
-        <form action="{{ route('bidang1.store') }}" method="POST">
+        <form action="{{ route('all-sub-divisi-store') }}" method="POST">
             @csrf
 
             <!-- Notulen -->
@@ -51,24 +20,31 @@
                 <textarea id="notulen" name="notulen" rows="4" required class="w-full border border-gray-300 rounded px-3 py-2"></textarea>
             </div>
 
+            <!-- Pilih Divisi -->
+            <div class="mb-4">
+                <label for="divisi" class="block text-sm font-medium text-gray-700 mb-1">Pilih Divisi</label>
+                <select id="divisi" name="divisi" class="w-full border border-gray-300 rounded px-3 py-2">
+                    <option value="">-- Pilih Divisi --</option>
+                </select>
+            </div>
+
+            <!-- Pilih Sub Divisi -->
+            <div class="mb-4" id="subDivisiWrapper" style="display:none;">
+                <label for="sub_divisi" class="block text-sm font-medium text-gray-700 mb-1">Pilih Sub Divisi</label>
+                <select id="sub_divisi" name="sub_divisi" class="w-full border border-gray-300 rounded px-3 py-2">
+                    <option value="">-- Pilih Sub Divisi --</option>
+                </select>
+            </div>
+
             <!-- Peserta -->
             <div class="mb-4">
                 <label class="block text-sm font-medium text-gray-700 mb-1">Daftar Peserta</label>
-
                 <label class="flex items-center space-x-2 mb-2">
                     <input type="checkbox" id="checkAll" class="rounded border-gray-300">
                     <span><strong>Centang Semua Peserta</strong></span>
                 </label>
-
-                <div class="grid grid-cols-2 gap-2">
-                    @php $peserta = ['Satinah', 'Tim1', 'Tim2']; @endphp
-                    @foreach ($peserta as $nama)
-                        <label class="flex items-center space-x-2">
-                            <input type="checkbox" name="peserta[]" value="{{ $nama }}"
-                                class="rounded border-gray-300">
-                            <span>{{ $nama }}</span>
-                        </label>
-                    @endforeach
+                <div id="pesertaContainer" class="grid grid-cols-2 gap-2">
+                    <p class="text-gray-500">Silakan pilih divisi atau sub divisi terlebih dahulu.</p>
                 </div>
             </div>
 
@@ -104,6 +80,180 @@
         </form>
     </div>
 
+    <script>
+        // Data Divisi, Sub Divisi, Peserta
+        const dataDivisi = {
+            "Yayasan": {
+                peserta: ["Hilda", "Sati", "Erni", "Aan", "Thia", "Dadah", "Dindin", "Hendi"]
+            },
+            "Bidang 1": {
+                subDivisi: {
+                    "Koord PU": ["Andi", "Budi", "Citra"],
+                    "Kls International": ["Rina", "Susi", "Bayu"]
+                }
+            },
+            "Bidang 2": {
+                subDivisi: {
+                    "Rapat dg tim Sarpras": ["Sari", "Agus", "Fikri"],
+                    "Rapat dg tim UUS": ["Ayu", "Bambang", "Dewi"],
+                    "Rapat dg tim AJS": ["Lina", "Tono", "Rizki"],
+                    "Rapat dg tim CS": ["Vina", "Rudi", "Nanda"],
+                    "Koordinasi dg tim BSP": ["Putri", "Adit", "Wulan"],
+                    "Koordinasi dg tim QFC": ["Samsul", "Gita", "Rama"]
+                }
+            },
+            "Bidang 3": {
+                subDivisi: {
+                    "PPDB": ["Eka", "Fina", "Sandi"],
+                    "Medsos Siswa": ["Heri", "Lusi", "Dani"],
+                    "Medsos Sekolah": ["Yani", "Iwan", "Mira"]
+                }
+            },
+            "Bidang 4": {
+                peserta: ["Anton", "Bella", "Caca", "Dono", "Evi"]
+            },
+            "SD": {
+                subDivisi: {
+                    "Rapat KS-Wakasek": ["Wahyu", "Nina", "Beni"],
+                    "Rapat Managemen": ["Siti", "Fajar", "Tari"],
+                    "Rapat KS-Koord. Program Unggulan": ["Udin", "Cici", "Toto"],
+                    "Rapat KS-Korjen": ["Vivi", "Heri", "Zaki"],
+                    "Rapat KS/Wakasek-BK": ["Bunga", "Rino", "Galih"],
+                    "Rapat KS/Wakasek-Koord.Wusho": ["Gina", "Hana", "Rio"],
+                    "Rapat KS/Wakasek-Koord.Kelulusan": ["Hani", "Jaka", "Miko"],
+                    "Rapat Tim Bahasa Arab": ["Zahra", "Fahri", "Lutfi"],
+                    "Rapat Tim Bahasa Inggris": ["Sari", "Andra", "Bima"],
+                    "Rapat Tim AQ": ["Yoga", "Hilda", "Putra"],
+                    "Rapat Tim MTK": ["Rini", "Edo", "Lala"],
+                    "Rapat Tim PAI": ["Tina", "Raka", "Deni"],
+                    "Rapat Umum": ["Oka", "Mila", "Faisal"]
+                }
+            },
+            "SMP": {
+                subDivisi: {
+                    "Rapat Unit": ["Fani", "Seno", "Tari"],
+                    "Rapat PKS": ["Indra", "Putri", "Bayu"],
+                    "Rapat Manajemen Level": ["Ari", "Nita", "Gilang"],
+                    "Rapat Al-Quran": ["Umar", "Hana", "Fikri"],
+                    "Rapat Bahasa Arab": ["Zaki", "Sari", "Budi"],
+                    "Rapat Bahasa Inggris": ["Lina", "Eko", "Rina"],
+                    "Rapat Tim Kesiswaan": ["Rizki", "Mira", "Tono"],
+                    "Rapat Mata Pelajaran": ["Adi", "Vivi", "Bagas"],
+                    "Rapat KS-BK": ["Dewi", "Candra", "Wawan"],
+                    "Rapat KS-Kurikulum": ["Yudi", "Fitri", "Andi"],
+                    "Rapat KS-Kesiswaan": ["Fani", "Tata", "Herman"]
+                }
+            },
+            "SMA": {
+                subDivisi: {
+                    "PKS Kurikulum": ["Rama", "Fahmi", "Nina"],
+                    "PKS Kesiswaan": ["Bagus", "Anisa", "Tio"],
+                    "Koordinator Program Unggulan": ["Wulan", "Ardi", "Sari"],
+                    "Tim literasi": ["Rudi", "Tika", "Gilang"],
+                    "Tim UTBK": ["Evi", "Heri", "Sandi"],
+                    "Tim Evakuasi": ["Bayu", "Lina", "Rama"],
+                    "Tim pengembangan kurikulum": ["Vina", "Hadi", "Putra"],
+                    "Tim sarana": ["Reno", "Gita", "Wawan"],
+                    "PJ organisasi": ["Sinta", "Eko", "Dewi"],
+                    "PJ ibadah": ["Yusuf", "Hana", "Andri"],
+                    "PJ media": ["Zahra", "Fani", "Rendi"],
+                    "PJ lomba": ["Dina", "Adi", "Putri"],
+                    "PJ ekskul": ["Rizki", "Bela", "Hendra"],
+                    "BK": ["Faisal", "Mira", "Gilang"]
+                }
+            }
+        };
+
+        const divisiSelect = document.getElementById('divisi');
+        const subDivisiWrapper = document.getElementById('subDivisiWrapper');
+        const subDivisiSelect = document.getElementById('sub_divisi');
+        const pesertaContainer = document.getElementById('pesertaContainer');
+
+        // Load divisi
+        Object.keys(dataDivisi).forEach(div => {
+            const opt = document.createElement('option');
+            opt.value = div;
+            opt.textContent = div;
+            divisiSelect.appendChild(opt);
+        });
+
+        // Handle divisi change
+        divisiSelect.addEventListener('change', function() {
+            const selected = this.value;
+            pesertaContainer.innerHTML = '';
+
+            if (!selected) {
+                subDivisiWrapper.style.display = 'none';
+                pesertaContainer.innerHTML =
+                    '<p class="text-gray-500">Silakan pilih divisi atau sub divisi terlebih dahulu.</p>';
+                return;
+            }
+
+            const data = dataDivisi[selected];
+            if (data.peserta) {
+                subDivisiWrapper.style.display = 'none';
+                renderPeserta(data.peserta);
+            } else if (data.subDivisi) {
+                subDivisiWrapper.style.display = 'block';
+                subDivisiSelect.innerHTML = '<option value="">-- Pilih Sub Divisi --</option>';
+                Object.keys(data.subDivisi).forEach(sub => {
+                    const opt = document.createElement('option');
+                    opt.value = sub;
+                    opt.textContent = sub;
+                    subDivisiSelect.appendChild(opt);
+                });
+                pesertaContainer.innerHTML =
+                    '<p class="text-gray-500">Silakan pilih sub divisi terlebih dahulu.</p>';
+            }
+        });
+
+        // Handle sub divisi change
+        subDivisiSelect.addEventListener('change', function() {
+            const selectedDivisi = divisiSelect.value;
+            const selectedSub = this.value;
+            if (!selectedSub) {
+                pesertaContainer.innerHTML =
+                    '<p class="text-gray-500">Silakan pilih sub divisi terlebih dahulu.</p>';
+                return;
+            }
+            renderPeserta(dataDivisi[selectedDivisi].subDivisi[selectedSub]);
+        });
+
+        // Render peserta
+        function renderPeserta(list) {
+            pesertaContainer.innerHTML = '';
+            list.forEach(nama => {
+                const label = document.createElement('label');
+                label.className = 'flex items-center space-x-2';
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.name = 'peserta[]';
+                checkbox.value = nama;
+                checkbox.className = 'rounded border-gray-300';
+                const span = document.createElement('span');
+                span.textContent = nama;
+                label.appendChild(checkbox);
+                label.appendChild(span);
+                pesertaContainer.appendChild(label);
+            });
+        }
+
+        // Check all
+        document.getElementById('checkAll').addEventListener('change', function() {
+            document.querySelectorAll('#pesertaContainer input[type="checkbox"]').forEach(cb => cb.checked = this
+                .checked);
+        });
+
+        // Set waktu otomatis
+        const waktuField = document.getElementById('waktu');
+        const now = new Date();
+        waktuField.value = now.getFullYear() + "-" +
+            String(now.getMonth() + 1).padStart(2, '0') + "-" +
+            String(now.getDate()).padStart(2, '0') + " " +
+            String(now.getHours()).padStart(2, '0') + ":" +
+            String(now.getMinutes()).padStart(2, '0') + ":" +
+            String(now.getSeconds()).padStart(2, '0');
+    </script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const waktuField = document.getElementById('waktu');
@@ -149,27 +299,12 @@
 
         window.addEventListener('DOMContentLoaded', startCamera);
     </script>
-
     <script>
         document.getElementById('captureAgain').addEventListener('click', () => {
             canvas.getContext('2d').drawImage(video, 0, 0);
             const imageData = canvas.toDataURL('image/png');
             photoInput.value = imageData;
             preview.src = imageData;
-        });
-    </script>
-
-    <script>
-        // Fungsi centang semua peserta
-        document.addEventListener('DOMContentLoaded', function() {
-            const checkAll = document.getElementById('checkAll');
-            const checkboxes = document.querySelectorAll('input[name="peserta[]"]');
-
-            checkAll.addEventListener('change', function() {
-                checkboxes.forEach(checkbox => {
-                    checkbox.checked = checkAll.checked;
-                });
-            });
         });
     </script>
 </body>

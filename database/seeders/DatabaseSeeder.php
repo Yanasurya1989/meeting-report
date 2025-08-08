@@ -87,5 +87,6 @@ class DatabaseSeeder extends Seeder
             'password' => bcrypt('hendi12345'),
             'role_id' => Role::where('name', 'ks_sma')->first()->id,
         ]);
+        $this->call(DivisiWithUsersSeeder::class);
     }
 }

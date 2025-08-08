@@ -9,6 +9,8 @@ use App\Http\Controllers\DashboardController;
 
 Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
 Route::get('meeting/{divisi}', [MeetingReportController::class, 'index'])->name('meeting.index');
+// routes/web.php
+Route::get('/get-users-by-divisi/{id}', [MeetingReportController::class, 'getUsersByDivisi']);
 
 // Yayasan
 Route::get('/meeting/create/yayasan', [MeetingReportController::class, 'create'])->name('meeting.create.yayasan');
@@ -92,3 +94,6 @@ foreach ($menus as $menu) {
 // Route::get('/', function () {
 //     return view('dashboard');
 // })->name('dashboard');
+
+Route::post('/all-sub-divisi-store', [App\Http\Controllers\MeetingReportController::class, 'allSubDivisiStore'])
+    ->name('all-sub-divisi-store');

@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use Carbon\Carbon;
+use App\Models\Divisi;
 use Illuminate\Http\Request;
 use App\Models\MeetingReport;
+use App\Models\MeetingKoordPU;
 use App\Models\MeetingReportSD;
 use App\Exports\BidangDuaExport;
 use App\Models\MeetingReportSma;
@@ -20,10 +22,171 @@ use App\Exports\MeetingReportSdExport;
 use App\Exports\RekapBidangSatuExport;
 use App\Exports\MeetingReportSmaExport;
 use App\Exports\MeetingReportSmpExport;
+use App\Models\MeetingKlsInternational;
 use Illuminate\Support\Facades\Storage;
 
 class MeetingReportController extends Controller
 {
+    public function indexSubdivisi()
+    {
+        // Data lengkap divisi, sub divisi, dan nama-nama peserta
+        $data = [
+            'Yayasan' => [
+                'subdivisi' => [],
+                'peserta' => ['Hilda', 'Sati', 'Erni', 'Aan', 'Thia', 'Dadah', 'Dindin', 'Hendi']
+            ],
+
+            'Bidang 1' => [
+                'subdivisi' => [
+                    'Koord PU' => ['Budi', 'Susi', 'Tono'],
+                    'Kelas International' => ['Rani', 'Rudi', 'Dewi']
+                ]
+            ],
+
+            'Bidang 2' => [
+                'subdivisi' => [
+                    'Rapat dg tim Sarpras' => ['Andi', 'Bambang', 'Citra'],
+                    'Rapat dg tim UUS' => ['Dian', 'Eka', 'Fajar'],
+                    'Rapat dg tim AJS' => ['Gina', 'Heri', 'Intan'],
+                    'Rapat dg tim CS' => ['Joko', 'Kiki', 'Lina'],
+                    'Koordinasi dg tim BSP' => ['Made', 'Nina', 'Oki'],
+                    'Koordinasi dg tim QFC' => ['Putri', 'Qori', 'Rian'],
+                ]
+            ],
+
+            'Bidang 3' => [
+                'subdivisi' => [
+                    'PPDB' => ['Dumy1', 'Dumy2', 'Dumy3'],
+                    'Medsos Siswa' => ['Dumy4', 'Dumy5', 'Dumy6'],
+                    'Medsos Sekolah' => ['Dumy7', 'Dumy8', 'Dumy9']
+                ]
+            ],
+
+            'Bidang 4' => [
+                'subdivisi' => [],
+                'peserta' => ['Alpha', 'Bravo', 'Charlie', 'Delta']
+            ],
+
+            'SD' => [
+                'subdivisi' => [
+                    'Rapat KS-Wakasek' => ['Satu', 'Dua', 'Tiga'],
+                    'Rapat Managemen' => ['Empat', 'Lima', 'Enam'],
+                    'Rapat KS-Koord. Program Unggulan' => ['Tujuh', 'Delapan', 'Sembilan'],
+                    'Rapat KS-Korjen' => ['Sepuluh', 'Sebelas', 'Dua Belas'],
+                    'Rapat KS/Wakasek-BK' => ['Tiga Belas', 'Empat Belas'],
+                    'Rapat KS/Wakasek-Koord.Wusho' => ['Lima Belas', 'Enam Belas'],
+                    'Rapat KS/Wakasek-Koord.Kelulusan' => ['Tujuh Belas', 'Delapan Belas'],
+                    'Rapat Tim Bahasa Arab' => ['Sembilan Belas', 'Dua Puluh'],
+                    'Rapat Tim Bahasa Inggris' => ['Dua Puluh Satu', 'Dua Puluh Dua'],
+                    'Rapat Tim AQ' => ['Dua Puluh Tiga', 'Dua Puluh Empat'],
+                    'Rapat Tim MTK' => ['Dua Puluh Lima', 'Dua Puluh Enam'],
+                    'Rapat Tim PAI' => ['Dua Puluh Tujuh', 'Dua Puluh Delapan'],
+                    'Rapat Umum' => ['Dua Puluh Sembilan', 'Tiga Puluh']
+                ]
+            ],
+
+            'SMP' => [
+                'subdivisi' => [
+                    'Rapat Unit' => ['A1', 'A2', 'A3'],
+                    'Rapat PKS' => ['B1', 'B2', 'B3'],
+                    'Rapat Manajemen Level' => ['C1', 'C2', 'C3'],
+                    'Rapat Al-Quran' => ['D1', 'D2', 'D3'],
+                    'Rapat Bahasa Arab' => ['E1', 'E2', 'E3'],
+                    'Rapat Bahasa Inggris' => ['F1', 'F2', 'F3'],
+                    'Rapat Tim Kesiswaan' => ['G1', 'G2', 'G3'],
+                    'Rapat Mata Pelajaran' => ['H1', 'H2', 'H3'],
+                    'Rapat KS-BK' => ['I1', 'I2', 'I3'],
+                    'Rapat KS-Kurikulum' => ['J1', 'J2', 'J3'],
+                    'Rapat KS-Kesiswaan' => ['K1', 'K2', 'K3']
+                ]
+            ],
+
+            'SMA' => [
+                'subdivisi' => [
+                    'PKS Kurikulum' => ['AA', 'BB', 'CC'],
+                    'PKS Kesiswaan' => ['DD', 'EE', 'FF'],
+                    'Koordinator Program Unggulan' => ['GG', 'HH', 'II'],
+                    'Tim Literasi' => ['JJ', 'KK', 'LL'],
+                    'Tim UTBK' => ['MM', 'NN', 'OO'],
+                    'Tim Evakuasi' => ['PP', 'QQ', 'RR'],
+                    'Tim Pengembangan Kurikulum' => ['SS', 'TT', 'UU'],
+                    'Tim Sarana' => ['VV', 'WW', 'XX'],
+                    'PJ Organisasi' => ['YY', 'ZZ', 'AAA'],
+                    'PJ Ibadah' => ['BBB', 'CCC', 'DDD'],
+                    'PJ Media' => ['EEE', 'FFF', 'GGG'],
+                    'PJ Lomba' => ['HHH', 'III', 'JJJ'],
+                    'PJ Ekskul' => ['KKK', 'LLL', 'MMM'],
+                    'BK' => ['NNN', 'OOO', 'PPP']
+                ]
+            ]
+        ];
+
+        return view('meeting.index-subdivisi', compact('data'));
+    }
+
+    public function allSubDivisiStore(Request $request)
+    {
+        $request->validate([
+            'notulen'       => 'required|string',
+            'peserta'       => 'required|array',
+            'capture_image' => 'required|string',
+            'waktu_rapat'   => 'required|date',
+            'divisi'        => 'required'
+        ]);
+
+        // Data yang akan disimpan
+        $data = [
+            'notulen'       => $request->notulen,
+            'peserta'       => $request->peserta,
+            'capture_image' => $request->capture_image,
+            'waktu_rapat'   => $request->waktu_rapat,
+        ];
+
+        // Ambil nama divisi dari ID
+        $divisiName = \App\Models\Divisi::find($request->divisi)?->nama;
+
+        if (!$divisiName) {
+            return back()->with('error', 'Divisi tidak dikenali.');
+        }
+
+        // Mapping nama divisi ke model tabel masing-masing
+        $divisiModelMap = [
+            'pks'               => \App\Models\MeetingPKS::class,
+            'manajemen level'   => \App\Models\MeetingManajemenLevel::class,
+            'al-quran'          => \App\Models\MeetingAlQuran::class,
+            'bahasa arab'       => \App\Models\MeetingBahasaArab::class,
+            'bahasa ingris'     => \App\Models\MeetingBahasaIngris::class,
+            'tim kesiswaan'     => \App\Models\MeetingTimKesiswaan::class,
+            'mata pelajaran'    => \App\Models\MeetingMataPelajaran::class,
+            'ks-bk'              => \App\Models\MeetingKSBK::class,
+            'ks-kurikulum'       => \App\Models\MeetingKSKurikulum::class,
+            'koord pu'           => \App\Models\MeetingKoordPU::class,
+            'kls internasional'  => \App\Models\MeetingKlsInternational::class,
+            'ks-kesiswaan'       => \App\Models\MeetingKSKesiswaan::class,
+        ];
+
+        // Cari model yang sesuai dengan divisi
+        $divisiKey = strtolower($divisiName);
+
+        if (!array_key_exists($divisiKey, $divisiModelMap)) {
+            return back()->with('error', 'Divisi tidak dikenali.');
+        }
+
+        // Simpan ke tabel sesuai model
+        $modelClass = $divisiModelMap[$divisiKey];
+        $modelClass::create($data);
+
+        return redirect()->back()->with('success', 'Laporan berhasil disimpan.');
+    }
+
+    public function getUsersByDivisi($id)
+    {
+        $divisi = Divisi::findOrFail($id);
+        $users = $divisi->users()->pluck('name', 'id'); // ambil nama & id user
+
+        return response()->json($users);
+    }
+
     public function indexByDivisi($divisi)
     {
         switch ($divisi) {
@@ -118,7 +281,8 @@ class MeetingReportController extends Controller
 
     public function bidang_satu_create()
     {
-        return view('meeting-report.bidang-satu.create');
+        $divisis = Divisi::all();
+        return view('meeting-report.bidang-satu.create', compact('divisis'));
     }
 
     public function bidang_satu_store(Request $request)
