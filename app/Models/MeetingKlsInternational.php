@@ -2,24 +2,16 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\AutoTableName;
 
 class MeetingKlsInternational extends Model
 {
-    use HasFactory;
-
-    protected $table = 'meeting_kls_international';
-
+    use AutoTableName;
     protected $fillable = [
         'notulen',
         'peserta',
         'capture_image',
         'waktu_rapat',
-    ];
-
-    protected $casts = [
-        'peserta' => 'array',
-        'waktu_rapat' => 'datetime',
     ];
 }

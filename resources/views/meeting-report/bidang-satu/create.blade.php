@@ -11,6 +11,28 @@
     <div class="max-w-2xl mx-auto bg-white p-6 rounded shadow">
         <h1 class="text-2xl font-bold mb-4">Form Laporan Meeting</h1>
 
+        @if ($errors->any())
+            <div class="bg-red-100 text-red-800 p-2 mb-4 rounded">
+                <ul class="list-disc pl-5">
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+
+        @if (session('error'))
+            <div class="bg-red-100 text-red-800 p-2 mb-4 rounded">
+                {{ session('error') }}
+            </div>
+        @endif
+
+        @if (session('success'))
+            <div class="bg-green-100 text-green-800 p-2 mb-4 rounded">
+                {{ session('success') }}
+            </div>
+        @endif
+
         <form action="{{ route('all-sub-divisi-store') }}" method="POST">
             @csrf
 

@@ -24,6 +24,7 @@ use App\Exports\MeetingReportSmaExport;
 use App\Exports\MeetingReportSmpExport;
 use App\Models\MeetingKlsInternational;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
 
 class MeetingReportController extends Controller
 {
@@ -124,6 +125,85 @@ class MeetingReportController extends Controller
         return view('meeting.index-subdivisi', compact('data'));
     }
 
+    public function allSubDivisiStoreBalikinIniKloBawahGabisa(Request $request)
+    {
+        $request->validate([
+            'notulen'       => 'required|string',
+            'peserta'       => 'required|array',
+            'capture_image' => 'required|string',
+            'waktu_rapat'   => 'required|date',
+            'sub_divisi'    => 'required|string'
+        ]);
+
+        $data = [
+            'notulen'       => $request->notulen,
+            'peserta'       => json_encode($request->peserta),
+            'capture_image' => $request->capture_image,
+            'waktu_rapat'   => $request->waktu_rapat,
+        ];
+
+        $divisiModelMap = [
+            'pks'               => \App\Models\MeetingPks::class,
+            'manajemen level'   => \App\Models\MeetingManajemenLevel::class,
+            'al-quran'          => \App\Models\MeetingAlQuran::class,
+            'bahasa arab'       => \App\Models\MeetingBahasaArab::class,
+            'bahasa inggris'    => \App\Models\MeetingBahasaIngris::class,
+            'tim kesiswaan'     => \App\Models\MeetingTimKesiswaan::class,
+            'mata pelajaran'    => \App\Models\MeetingMataPelajaran::class,
+            'ks-bk'             => \App\Models\MeetingKsBk::class,
+            'ks-kurikulum'      => \App\Models\MeetingKsKurikulum::class,
+            'koord pu'          => \App\Models\MeetingKoordPU::class,
+            'kls internasional' => \App\Models\MeetingKlsInternational::class,
+            'ks-kesiswaan'      => \App\Models\MeetingKsKesiswaan::class,
+            // kalau ada model untuk 'unit', tambahkan di sini:
+            // 'unit' => \App\Models\MeetingUnit::class,
+        ];
+
+        // --- Normalisasi / buat kandidat key ---
+        $raw = $request->sub_divisi;
+        $normalized = strtolower(trim($raw));
+        // hapus prefix seperti "rapat " atau "rapat " (case-insensitive)
+        $normalized = preg_replace('/^rapat\s+/i', '', $normalized);
+        $normalized = preg_replace('/\s+/', ' ', $normalized); // collapse spaces
+
+        $candidates = [
+            $normalized,                        // ex: "ks-kurikulum" or "manajemen level"
+            str_replace(' ', '-', $normalized), // "manajemen-level"
+            str_replace('-', ' ', $normalized), // "ks kurikulum"
+            str_replace(' ', '', $normalized),  // "kskurikulum"
+        ];
+
+        $foundKey = null;
+        foreach ($candidates as $cand) {
+            if (array_key_exists($cand, $divisiModelMap)) {
+                $foundKey = $cand;
+                break;
+            }
+        }
+
+        if (!$foundKey) {
+            // log untuk debugging lokal
+            Log::info('SubDivisi tidak dikenali', [
+                'raw' => $raw,
+                'normalized' => $normalized,
+                'candidates' => $candidates
+            ]);
+
+            return back()
+                ->withInput()
+                ->with('error', 'Sub divisi tidak dikenali: "' . $raw . '". Dicoba key: ' . implode(', ', $candidates));
+        }
+
+        try {
+            $modelClass = $divisiModelMap[$foundKey];
+            $modelClass::create($data);
+            return back()->with('success', 'Laporan berhasil disimpan.');
+        } catch (\Throwable $e) {
+            Log::error('Gagal menyimpan meeting', ['error' => $e->getMessage()]);
+            return back()->withInput()->with('error', 'Gagal menyimpan: ' . $e->getMessage());
+        }
+    }
+
     public function allSubDivisiStore(Request $request)
     {
         $request->validate([
@@ -131,52 +211,70 @@ class MeetingReportController extends Controller
             'peserta'       => 'required|array',
             'capture_image' => 'required|string',
             'waktu_rapat'   => 'required|date',
-            'divisi'        => 'required'
+            // sub_divisi tidak wajib, salah satu dari divisi atau sub_divisi harus ada
         ]);
 
-        // Data yang akan disimpan
+        // Ambil nama yang akan dipakai untuk mapping
+        $raw = $request->sub_divisi ?: $request->divisi; // pakai sub_divisi jika ada, kalau tidak pakai divisi
+        $normalized = strtolower(trim($raw));
+        $normalized = preg_replace('/^rapat\s+/i', '', $normalized);
+        $normalized = preg_replace('/\s+/', ' ', $normalized);
+
+        $candidates = [
+            $normalized,
+            str_replace(' ', '-', $normalized),
+            str_replace('-', ' ', $normalized),
+            str_replace(' ', '', $normalized),
+        ];
+
+        $divisiModelMap = [
+            // sub divisi
+            'pks'               => \App\Models\MeetingPks::class,
+            'manajemen level'   => \App\Models\MeetingManajemenLevel::class,
+            'al-quran'          => \App\Models\MeetingAlQuran::class,
+            'bahasa arab'       => \App\Models\MeetingBahasaArab::class,
+            'bahasa inggris'    => \App\Models\MeetingBahasaIngris::class,
+            'tim kesiswaan'     => \App\Models\MeetingTimKesiswaan::class,
+            'mata pelajaran'    => \App\Models\MeetingMataPelajaran::class,
+            'ks-bk'             => \App\Models\MeetingKsBk::class,
+            'ks-kurikulum'      => \App\Models\MeetingKsKurikulum::class,
+            'koord pu'          => \App\Models\MeetingKoordPU::class,
+            'kls internasional' => \App\Models\MeetingKlsInternational::class,
+            'ks-kesiswaan'      => \App\Models\MeetingKsKesiswaan::class,
+
+            // langsung divisi
+            'yayasan'           => \App\Models\MeetingReport::class,
+            'bidang 4'          => \App\Models\MeetingReportBidang4::class,
+        ];
+
+        $foundKey = null;
+        foreach ($candidates as $cand) {
+            if (array_key_exists($cand, $divisiModelMap)) {
+                $foundKey = $cand;
+                break;
+            }
+        }
+
+        if (!$foundKey) {
+            return back()
+                ->withInput()
+                ->with('error', 'Divisi/Sub divisi tidak dikenali: "' . $raw . '"');
+        }
+
         $data = [
             'notulen'       => $request->notulen,
-            'peserta'       => $request->peserta,
+            'peserta'       => json_encode($request->peserta),
             'capture_image' => $request->capture_image,
             'waktu_rapat'   => $request->waktu_rapat,
         ];
 
-        // Ambil nama divisi dari ID
-        $divisiName = \App\Models\Divisi::find($request->divisi)?->nama;
-
-        if (!$divisiName) {
-            return back()->with('error', 'Divisi tidak dikenali.');
+        try {
+            $modelClass = $divisiModelMap[$foundKey];
+            $modelClass::create($data);
+            return back()->with('success', 'Laporan berhasil disimpan.');
+        } catch (\Throwable $e) {
+            return back()->withInput()->with('error', 'Gagal menyimpan: ' . $e->getMessage());
         }
-
-        // Mapping nama divisi ke model tabel masing-masing
-        $divisiModelMap = [
-            'pks'               => \App\Models\MeetingPKS::class,
-            'manajemen level'   => \App\Models\MeetingManajemenLevel::class,
-            'al-quran'          => \App\Models\MeetingAlQuran::class,
-            'bahasa arab'       => \App\Models\MeetingBahasaArab::class,
-            'bahasa ingris'     => \App\Models\MeetingBahasaIngris::class,
-            'tim kesiswaan'     => \App\Models\MeetingTimKesiswaan::class,
-            'mata pelajaran'    => \App\Models\MeetingMataPelajaran::class,
-            'ks-bk'              => \App\Models\MeetingKSBK::class,
-            'ks-kurikulum'       => \App\Models\MeetingKSKurikulum::class,
-            'koord pu'           => \App\Models\MeetingKoordPU::class,
-            'kls internasional'  => \App\Models\MeetingKlsInternational::class,
-            'ks-kesiswaan'       => \App\Models\MeetingKSKesiswaan::class,
-        ];
-
-        // Cari model yang sesuai dengan divisi
-        $divisiKey = strtolower($divisiName);
-
-        if (!array_key_exists($divisiKey, $divisiModelMap)) {
-            return back()->with('error', 'Divisi tidak dikenali.');
-        }
-
-        // Simpan ke tabel sesuai model
-        $modelClass = $divisiModelMap[$divisiKey];
-        $modelClass::create($data);
-
-        return redirect()->back()->with('success', 'Laporan berhasil disimpan.');
     }
 
     public function getUsersByDivisi($id)
